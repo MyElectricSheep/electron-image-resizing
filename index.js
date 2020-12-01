@@ -5,8 +5,9 @@ const imagemin = require('imagemin')
 const imageminMozjpeg = require('imagemin-mozjpeg')
 const imageminPngquant = require('imagemin-pngquant')
 const slash = require('slash')
+const log = require('electron-log')
 
-process.env.NODE_ENV = 'development'
+process.env.NODE_ENV = 'production'
 
 const isDev = () => process.env.NODE_ENV !== 'production' ? true : false
 const isMac = () => process.platform === 'darwin' ? true : false
@@ -19,7 +20,7 @@ console.log(`${__dirname}/images/favicon.png`)
 
 const createMainWindow = () => {
     mainWindow = new BrowserWindow({
-        width: isDev ? 1000 : 500,
+        width: isDev() ? 1000 : 500,
         height: 600,
         title: "Chicken What",
         icon: `${__dirname}/images/favicon.png`,
@@ -30,7 +31,7 @@ const createMainWindow = () => {
         }
     })
 
-    if (isDev) {
+    if (isDev()) {
         mainWindow.webContents.openDevTools()
     }
     
@@ -74,7 +75,7 @@ const menu = [
     // ...(isMac ? [
     //     { role: 'appMenu'}
     // ] : [] ),
-    ...(isMac ? [
+    ...(isMac() ? [
         { label: app.name,
           submenu: [
               {
@@ -100,7 +101,7 @@ const menu = [
         role: 'fileMenu' 
     },
     // For windows users:
-    ...(!isMac ? [
+    ...(!isMac() ? [
         {
             label: 'Help',
             submenu: [
@@ -111,7 +112,7 @@ const menu = [
             ]
         }
     ] : []),
-    ...(isDev ? [{
+    ...(isDev() ? [{
         label: 'Developer',
         submenu: [
             {
@@ -164,11 +165,14 @@ const shrinkImage = async ({ imgPath, quality, dest }) => {
             ]
         })
         console.log(files)
+        // log.info(files)
+        
         shell.openPath(dest)
 
         mainWindow.webContents.send('image:done')
     } catch (e) {
-        console.log(e.message)
+        // console.log(e.message)
+        log.error(e.message)
     }
 }
 
